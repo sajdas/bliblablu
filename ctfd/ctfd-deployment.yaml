@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ctfd-deployment
+  labels:
+    app: ctfd
+  name: ctfd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ctfd
+  template:
+    metadata:
+      labels:
+        app: ctfd
+    spec:
+      containers:
+      - env:
+        - name: ACCESS_LOG
+          value: '-'
+        - name: DATABASE_URL
+          value: mysql+pymysql://ctfd:ctfd@mariadb-svc:3306/ctfd
+        - name: ERROR_LOG
+          value: '-'
+        - name: LOG_FOLDER
+          value: /var/log/CTFd
+       #- name: REDIS_URL
+       #   value: redis://cache:6379
+        - name: REVERSE_PROXY
+          value: "true"
+        - name: UPLOAD_FOLDER
+          value: /var/uploads
+        - name: WORKERS
+          value: "1"
+        image: ctfd/ctfd:latest
+        imagePullPolicy: ""
+        name: ctfd
+        ports:
+        - containerPort: 8000
+        resources: {}
+        volumeMounts:
+        - mountPath: /var/log/CTFd
+          name: ctfd-claim0
+        - mountPath: /var/uploads
+          name: ctfd-claim1
+        #- mountPath: /opt/CTFd
+          #name: ctfd-claim2
+          #readOnly: true
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - name: ctfd-claim0
+        persistentVolumeClaim:
+          claimName: ctfd-claim0
+      - name: ctfd-claim1
+        persistentVolumeClaim:
+          claimName: ctfd-claim1
+      - name: ctfd-claim2
+        persistentVolumeClaim:
+          claimName: ctfd-claim2
+          readOnly: true

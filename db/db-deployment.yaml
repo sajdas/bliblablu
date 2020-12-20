@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: db
+  name: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+      - args:
+        - mysqld
+        - --character-set-server=utf8mb4
+        - --collation-server=utf8mb4_unicode_ci
+        - --wait_timeout=28800
+        - --log-warnings=0
+        env:
+        - name: MYSQL_DATABASE
+          value: ctfd
+        - name: MYSQL_PASSWORD
+          value: ctfd
+        - name: MYSQL_ROOT_PASSWORD
+          value: ctfd
+        - name: MYSQL_USER
+          value: ctfd
+        image: mariadb:10.4.12
+        imagePullPolicy: ""
+        name: db
+        resources: {}
+        volumeMounts:
+        - mountPath: /var/lib/mysql
+          name: db-claim0
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - name: db-claim0
+        persistentVolumeClaim:
+          claimName: db-claim0
